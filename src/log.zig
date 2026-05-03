@@ -9,20 +9,14 @@ file: File,
 size: u64,
 height: u64,
 
-pub const Params = struct {
-    dir: Dir,
-    path: []const u8,
-    size: u64,
-};
-
-pub fn open(io: Io, params: Params) !Log {
-    const file = try params.dir.createFile(io, params.path, .{ .read = true, .truncate = false });
+pub fn open(io: Io, dir: Dir, path: []const u8, comptime size: u64) !Log {
+    const file = try dir.createFile(io, path, .{ .read = true, .truncate = false });
     const length = try file.length(io);
-    const height = length / params.size;
+    const height = length / size;
 
     return .{
         .file = file,
-        .size = params.size,
+        .size = size,
         .height = height,
     };
 }
@@ -51,7 +45,7 @@ test "open creates an empty log with height 0" {
     var tmp = testing.tmpDir(.{});
     defer tmp.cleanup();
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 8 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 8);
     defer log.close(io);
 
     try testing.expectEqual(@as(usize, 0), log.height);
@@ -62,7 +56,7 @@ test "append one entry then read it back" {
     var tmp = testing.tmpDir(.{});
     defer tmp.cleanup();
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 8 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 8);
     defer log.close(io);
 
     const entry: []const u8 = "abcdefgh";
@@ -79,7 +73,7 @@ test "append many entries and read each by index" {
     var tmp = testing.tmpDir(.{});
     defer tmp.cleanup();
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 4);
     defer log.close(io);
 
     const entries = [_][]const u8{
@@ -108,13 +102,13 @@ test "reopen recovers height and contents from disk" {
     const e1: []const u8 = "89abcdef";
 
     {
-        var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 8 });
+        var log = try Log.open(io, tmp.dir, "log.bin", 8);
         defer log.close(io);
         try log.append(io, e0);
         try log.append(io, e1);
     }
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 8 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 8);
     defer log.close(io);
 
     try testing.expectEqual(@as(usize, 2), log.height);
@@ -135,12 +129,12 @@ test "append after reopen continues from previous height" {
     const e1: []const u8 = "bbbb";
 
     {
-        var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+        var log = try Log.open(io, tmp.dir, "log.bin", 4);
         defer log.close(io);
         try log.append(io, e0);
     }
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 4);
     defer log.close(io);
     try testing.expectEqual(@as(usize, 1), log.height);
 
@@ -157,7 +151,7 @@ test "append after reopen continues from previous height" {
 test "open fails when parent directory does not exist" {
     const io = testing.io;
 
-    const result = Log.open(io, .{ .dir = Dir.cwd(), .path = "evtdb-nonexistent-parent/log.bin", .size = 8 });
+    const result = Log.open(io, Dir.cwd(), "evtdb-nonexistent-parent/log.bin", 8);
     try testing.expectError(error.FileNotFound, result);
 }
 
@@ -174,7 +168,7 @@ test "trailing partial entry is excluded from height on open" {
         try f.sync(io);
     }
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 8 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 8);
     defer log.close(io);
 
     try testing.expectEqual(@as(usize, 1), log.height);
@@ -190,18 +184,18 @@ test "open is idempotent on an existing complete log" {
     defer tmp.cleanup();
 
     {
-        var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+        var log = try Log.open(io, tmp.dir, "log.bin", 4);
         defer log.close(io);
         try log.append(io, "wxyz");
     }
 
     {
-        var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+        var log = try Log.open(io, tmp.dir, "log.bin", 4);
         defer log.close(io);
         try testing.expectEqual(@as(usize, 1), log.height);
     }
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 4);
     defer log.close(io);
     try testing.expectEqual(@as(usize, 1), log.height);
 }
@@ -211,7 +205,7 @@ test "append rejects entry with wrong size" {
     var tmp = testing.tmpDir(.{});
     defer tmp.cleanup();
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 4);
     defer log.close(io);
 
     try testing.expectError(error.InvalidEntrySize, log.append(io, "abc"));
@@ -224,7 +218,7 @@ test "read past the end returns EndOfStream" {
     var tmp = testing.tmpDir(.{});
     defer tmp.cleanup();
 
-    var log = try Log.open(io, .{ .dir = tmp.dir, .path = "log.bin", .size = 4 });
+    var log = try Log.open(io, tmp.dir, "log.bin", 4);
     defer log.close(io);
 
     var out: [4]u8 = undefined;
