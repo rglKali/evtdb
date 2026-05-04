@@ -27,9 +27,17 @@ pub fn close(self: *Log, io: Io) void {
 
 pub fn append(self: *Log, io: Io, entry: []const u8) !void {
     if (entry.len != self.size) return error.InvalidEntrySize;
+    try self.file.setLength(io, self.size * self.height + 1);
     try self.file.writePositionalAll(io, entry, self.size * self.height);
     try self.file.sync(io);
     self.height += 1;
+}
+
+pub fn revert(self: *Log, io: Io) !void {
+    if (self.height == 0) return error.LogEmpty;
+    self.height -= 1;
+    try self.file.setLength(io, self.size * self.height);
+    try self.file.sync(io);
 }
 
 pub fn read(self: *Log, io: Io, idx: usize, to: []u8) !void {
