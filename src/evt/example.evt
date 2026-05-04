@@ -1,0 +1,13 @@
+type UserID = u64;
+
+type Coords = struct {
+    x: u32,
+    y: u32
+};
+
+type UserCreated = struct {
+    id: UserId,
+    pos: Coords,
+};
+
+event UserCreated;
