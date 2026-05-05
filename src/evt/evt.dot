@@ -1,0 +1,29 @@
+digraph G {
+    splines="FALSE";
+
+    type [shape=rectangle];
+    type_name [label="Identifier"];
+    type -> type_name;
+    type_value [label="Value"];
+    type_name -> type_value;
+    
+    struct [shape=rectangle];    
+    struct_name [label="Identifier"];
+    struct -> struct_name;
+    struct_lbrace [label="{"];
+    struct_name -> struct_lbrace;
+    struct_field_name [label="Identifier"];
+    struct_lbrace -> struct_field_name;
+    struct_field_value [label="Value"];
+    struct_field_name -> struct_field_value;
+    struct_comma [label=","];
+    struct_field_value -> struct_comma;
+    struct_comma -> struct_field_name;
+    struct_rbrace [label="}"];
+    struct_field_value -> struct_rbrace;
+    struct_comma -> struct_rbrace;
+
+    event [shape=rectangle, style=filled];
+    event_value [label="Value"];
+    event -> event_value;
+}

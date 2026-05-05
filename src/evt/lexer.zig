@@ -1,11 +1,6 @@
 const std = @import("std");
 const mem = std.mem;
 const fmt = std.fmt;
-const ascii = std.ascii;
-
-const Scanner = @import("scanner.zig");
-
-const Lexer = @This();
 
 pub const Token = union(enum) {
     EventKeyword,
@@ -25,16 +20,46 @@ pub const Token = union(enum) {
     Comma,
 };
 
-scanner: Scanner,
+pub const Lexer = @This();
 
-pub fn init(source: []const u8) Lexer {
-    return .{
-        .scanner = Scanner.init(source, " \t\r\n{}()=;:,"),
-    };
+const table: [256]bool = blk: {
+    var t = [_]bool{false} ** 256;
+    for (" \r\n\t{}[]=:;,") |s| t[s] = true;
+    break :blk t;
+};
+
+stream: []const u8,
+pos: usize,
+
+pub fn init(stream: []const u8) Lexer {
+    return .{ .stream = stream, .pos = 0 };
+}
+
+pub fn reset(self: *Lexer) void {
+    self.pos = 0;
+}
+
+fn scan(self: *Lexer) !?union(enum) {
+    blob: []const u8,
+    symbol: u8,
+} {
+    if (self.pos >= self.stream.len) return null;
+
+    if (table[self.stream[self.pos]]) {
+        const c = self.stream[self.pos];
+        self.pos += 1;
+        return .{ .symbol = c };
+    }
+
+    const start = self.pos;
+    while (self.pos < self.stream.len and !table[self.stream[self.pos]])
+        self.pos += 1;
+
+    return .{ .blob = self.stream[start..self.pos] };
 }
 
 pub fn next(self: *Lexer) !?Token {
-    const tok = try self.scanner.next() orelse return null;
+    const tok = try self.scan() orelse return null;
 
     switch (tok) {
         .symbol => |c| {
