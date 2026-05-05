@@ -1,0 +1,13 @@
+.{
+    .name = .zli,
+    .version = "5.0.0",
+    .fingerprint = 0x5b01c9c3a623e52d,
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        "README.md",
+    },
+}
