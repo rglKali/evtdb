@@ -5,9 +5,9 @@ type Coords = struct {
     y: u32
 };
 
-type UserCreated = struct {
+event UserCreated = struct {
     id: UserId,
     pos: Coords,
 };
 
-event UserCreated;
+event UserRemoved = u64;

@@ -3,9 +3,12 @@ const mem = std.mem;
 const fmt = std.fmt;
 
 pub const Token = union(enum) {
-    EventKeyword,
     TypeKeyword,
+    EventKeyword,
+
     StructKeyword,
+    UnionKeyword,
+    EnumKeyword,
 
     Identifier: []const u8,
     Length: usize,
@@ -77,9 +80,12 @@ pub fn next(self: *Lexer) !?Token {
             };
         },
         .blob => |text| {
-            if (mem.eql(u8, text, "event")) return .EventKeyword;
             if (mem.eql(u8, text, "type")) return .TypeKeyword;
+            if (mem.eql(u8, text, "event")) return .EventKeyword;
+
             if (mem.eql(u8, text, "struct")) return .StructKeyword;
+            if (mem.eql(u8, text, "union")) return .UnionKeyword;
+            if (mem.eql(u8, text, "enum")) return .EnumKeyword;
 
             // try to parse as a length
             const length = fmt.parseInt(usize, text, 0) catch return .{ .Identifier = text };
