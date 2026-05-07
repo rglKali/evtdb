@@ -19,5 +19,5 @@ test "basic add functionality" {
 
 test {
     _ = @import("log.zig");
-    _ = @import("parser.zig");
+    _ = @import("schema.zig");
 }
