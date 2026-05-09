@@ -3,65 +3,36 @@ const std = @import("std");
 // The string identifier for type names and struct field names
 pub const Identifier = []const u8;
 
-pub fn freeIdentifier(alloc: std.mem.Allocator, id: Identifier) void {
-    alloc.free(id);
-}
-
-pub fn freeIdentifiers(alloc: std.mem.Allocator, idents: []Identifier) void {
-    for (idents) |ident| freeIdentifier(alloc, ident);
-    alloc.free(idents);
-}
-
 // Fixed-size array
 pub const Array = struct {
     size: u64,
-    value: Type,
+    value: Identifier,
 };
 
-pub fn freeArray(alloc: std.mem.Allocator, array: *Array) void {
-    freeType(alloc, array.value);
-    alloc.destroy(array);
-}
-
-// Key-value pair for identifier and the type it maps to
+// Key-value pair for struct or unions
 pub const Entry = struct {
     key: Identifier,
-    value: Type,
+    value: Identifier,
 };
 
-pub fn freeEntry(alloc: std.mem.Allocator, e: Entry) void {
-    freeIdentifier(alloc, e.key);
-    freeType(alloc, e.value);
-}
-
-pub fn freeEntries(alloc: std.mem.Allocator, entries: []Entry) void {
-    for (entries) |entry| freeEntry(alloc, entry);
-    alloc.free(entries);
-}
-
-// The different types that can be defined in the schema
-pub const Type = union(enum) {
+// The value of a type definition
+pub const Value = union(enum) {
     Struct: []Entry,
     Union: []Entry,
     Enum: []Identifier,
     Ident: Identifier,
-    Array: *Array, // to avoid recursive type definition
+    Array: Array,
 };
 
-pub fn freeType(alloc: std.mem.Allocator, value: Type) void {
-    switch (value) {
-        .Struct, .Union => |fields| freeEntries(alloc, fields),
-        .Enum => |idents| freeIdentifiers(alloc, idents),
-        .Ident => |ident| freeIdentifier(alloc, ident),
-        .Array => |arr| freeArray(alloc, arr),
-    }
-}
+// A type definition
+pub const Type = struct {
+    name: Identifier,
+    value: Value,
+};
 
-pub fn free(alloc: std.mem.Allocator, entries: []Entry) void {
-    freeEntries(alloc, entries);
-}
-
+// The error type for parsing and printing
 pub const Error = error{ OutOfMemory, SyntaxError };
 
-const Parser = fn (std.mem.Allocator, []const u8) Error!?[]Entry;
-const Printer = fn (std.mem.Allocator, []Entry) Error!?[]const u8;
+// The main parser and printer function types
+const Parser = fn (std.mem.Allocator, []const u8) Error!?[]Type;
+const Printer = fn (std.mem.Allocator, []Type) Error!?[]const u8;

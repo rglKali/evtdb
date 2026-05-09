@@ -1,22 +1,5 @@
 digraph G {
     splines = "FALSE";
-    
-    // subgraph File {
-    //     f_file [style = filled;label = "file";];
-    //     f_type [label = "type";];
-    //     f_ident [label = "ident";];
-    //     f_assignment [label = "=";];
-    //     f_value [label = "value";];
-    //     f_assignment [label = "=";];
-    //     f_terminator [label = ";";];
-
-    //     f_file -> f_type;
-    //     f_type -> f_ident;
-    //     f_ident -> f_assignment;
-    //     f_assignment -> f_value;
-    //     f_value -> f_terminator;
-    //     f_terminator -> f_type;
-    // }
 
     subgraph File {
         f_file [style = filled;label = "file";];
