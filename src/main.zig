@@ -16,14 +16,14 @@ pub fn main(init: std.process.Init) !void {
     var stdin_reader = Io.File.Reader.init(.stdin(), io, &rbuf);
     const stdin = &stdin_reader.interface;
 
-    const root = try cli.build(.{
+    const cmd = try cli.build(.{
         .allocator = init.gpa,
         .io = io,
         .writer = stdout,
         .reader = stdin,
     });
-    defer root.deinit();
+    defer cmd.deinit();
 
     var argsIter = init.minimal.args.iterate();
-    try root.execute(&argsIter, .{}); // Or pass data with: try root.execute(&argsIter, .{ .data = &my_data });
+    try cmd.execute(&argsIter, .{}); // Or pass data with: try root.execute(&argsIter, .{ .data = &my_data });
 }
