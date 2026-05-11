@@ -1,68 +1,96 @@
 digraph G {
     splines = "FALSE";
 
-    subgraph File {
-        f_file [style = filled;label = "file";];
-        f_type [label = "type";];
-        f_ident [label = "ident";];
-        f_terminator [label = ";";];
+    start [label = "start"; shape = "doublecircle";];
+    end [label = "end"; shape = "doublecircle";];
 
-        f_file -> f_type;
-        f_type -> f_ident;
-        f_ident -> f_terminator;
-        f_terminator -> f_type;
+    subgraph struct {
+        struct_label [label = "struct";];
+        struct_name [label = "name";];
+        struct_lbrace [label = "{";];
+        struct_type [label = "type";];
+        struct_ident [label = "ident";];
+        struct_lbracket [label = "[";];
+        struct_length [label = "length";];
+        struct_rbracket [label = "]";];
+        struct_comma [label = ",";];
+        struct_rbrace [label = "}";];
+
+        start -> struct_label;
+        struct_label -> struct_name;
+        struct_name -> struct_lbrace;
+        struct_lbrace -> struct_type;
+        struct_type -> struct_ident;
+        struct_ident -> struct_lbracket;
+        struct_lbracket -> struct_length;
+        struct_length -> struct_rbracket;
+        struct_rbracket -> struct_comma;
+        struct_ident -> struct_comma;
+        struct_comma -> struct_type;
+        struct_rbracket -> struct_rbrace;
+        struct_ident -> struct_rbrace;
+        struct_rbrace -> end;
     }
 
-    subgraph Value {
-        v_value [label = "value";style = filled;];
-        v_struct [label = "struct";];
-        v_union [label = "union";];
-        v_enum [label = "enum";];
-        v_array [label = "array";style = filled;];
-        v_ident [label = "ident";];
+    subgraph union {
+        union_label [label = "union";];
+        union_name [label = "name";];
+        union_lbrace [label = "{";];
+        union_type [label = "type";];
+        union_ident [label = "ident";];
+        union_lbracket [label = "[";];
+        union_length [label = "length";];
+        union_rbracket [label = "]";];
+        union_comma [label = ",";];
+        union_rbrace [label = "}";];
 
-        vsu_lbrace [label = "{";];
-        vsu_ident [label = "ident";];
-        vsu_colon [label = ":";];
-        vsu_value [label = "value";];
-        vsu_comma [label = ",";];
-        vsu_rbrace [label = "}";];
+        start -> union_label;
+        union_label -> union_name;
+        union_name -> union_lbrace;
+        union_lbrace -> union_type;
+        union_type -> union_ident;
+        union_ident -> union_lbracket;
+        union_lbracket -> union_length;
+        union_length -> union_rbracket;
+        union_rbracket -> union_comma;
+        union_ident -> union_comma;
+        union_comma -> union_type;
+        union_rbracket -> union_rbrace;
+        union_ident -> union_rbrace;
+        union_rbrace -> end;
+    }
 
-        e_lbrace [label = "{";];
-        e_ident [label = "ident";];
-        e_comma [label = ",";];
-        e_rbrace [label = "}";];
+    subgraph enum {
+        enum_label [label = "enum";];
+        enum_name [label = "name";];
+        enum_lbrace [label = "{";];
+        enum_ident [label = "ident";];
+        enum_comma [label = ",";];
+        enum_rbrace [label = "}";];
 
-        va_lbrack [label = "[";];
-        va_rbrack [label = "]";];
-        va_length [label = "length";];
-        va_value [label = "value";];
+        start -> enum_label;
+        enum_label -> enum_name;
+        enum_name -> enum_lbrace;
+        enum_lbrace -> enum_ident;
+        enum_ident -> enum_comma;
+        enum_comma -> enum_ident;
+        enum_ident -> enum_rbrace;
+        enum_rbrace -> end;
+    }
 
-        v_value -> v_struct;
-        v_value -> v_union;
-        v_value -> v_enum;
-        v_value -> v_array;
+    subgraph type {
+        type_label [label = "type";];
+        type_name [label = "name";];
+        type_lbracket [label = "[";];
+        type_length [label = "length";];
+        type_rbracket [label = "]";];
 
-        v_struct -> vsu_lbrace;
-        v_union -> vsu_lbrace;
-        vsu_lbrace -> vsu_ident;
-        vsu_ident -> vsu_colon;
-        vsu_colon -> vsu_value;
-        vsu_value -> vsu_comma;
-        vsu_comma -> vsu_ident;
-        vsu_value -> vsu_rbrace;
-
-        v_enum -> e_lbrace;
-        e_lbrace -> e_ident;
-        e_ident -> e_comma;
-        e_comma -> e_ident;
-        e_ident -> e_rbrace;
-
-        v_array -> va_lbrack;
-        va_lbrack -> va_length;
-        va_length -> va_rbrack;
-        va_rbrack -> va_value;
-
-        v_value -> v_ident;
+        start -> type_label;
+        type_label -> type_name;
+        type_name -> type_lbracket;
+        type_lbracket -> type_length;
+        type_length -> type_rbracket;
+        type_name -> end;
+        type_rbracket -> end;
     }
 }

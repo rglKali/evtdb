@@ -27,7 +27,7 @@ pub const Value = union(enum) {
 // A type definition
 pub const Type = struct {
     name: Identifier,
-    value: Value,
+    typ: Value,
 };
 
 // The error type for parsing and printing

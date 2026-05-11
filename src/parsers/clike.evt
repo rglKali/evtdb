@@ -1,0 +1,13 @@
+type UserID u64
+
+struct Coords {
+    x u32,
+    y u32
+};
+
+struct UserCreated {
+    id UserID,
+    path[4] Coords
+};
+
+type EventUserCreated UserCreated
