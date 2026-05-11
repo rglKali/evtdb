@@ -1,0 +1,96 @@
+digraph G {
+    splines = "FALSE";
+
+    start [label = "start"; shape = "doublecircle";];
+    end [label = "end"; shape = "doublecircle";];
+
+    subgraph struct {
+        struct_label [label = "struct";];
+        struct_name [label = "name";];
+        struct_lbrace [label = "{";];
+        struct_type [label = "type";];
+        struct_ident [label = "ident";];
+        struct_lbracket [label = "[";];
+        struct_length [label = "length";];
+        struct_rbracket [label = "]";];
+        struct_comma [label = ",";];
+        struct_rbrace [label = "}";];
+
+        start -> struct_label;
+        struct_label -> struct_name;
+        struct_name -> struct_lbrace;
+        struct_lbrace -> struct_type;
+        struct_type -> struct_ident;
+        struct_ident -> struct_lbracket;
+        struct_lbracket -> struct_length;
+        struct_length -> struct_rbracket;
+        struct_rbracket -> struct_comma;
+        struct_ident -> struct_comma;
+        struct_comma -> struct_type;
+        struct_rbracket -> struct_rbrace;
+        struct_ident -> struct_rbrace;
+        struct_rbrace -> end;
+    }
+
+    subgraph union {
+        union_label [label = "union";];
+        union_name [label = "name";];
+        union_lbrace [label = "{";];
+        union_type [label = "type";];
+        union_ident [label = "ident";];
+        union_lbracket [label = "[";];
+        union_length [label = "length";];
+        union_rbracket [label = "]";];
+        union_comma [label = ",";];
+        union_rbrace [label = "}";];
+
+        start -> union_label;
+        union_label -> union_name;
+        union_name -> union_lbrace;
+        union_lbrace -> union_type;
+        union_type -> union_ident;
+        union_ident -> union_lbracket;
+        union_lbracket -> union_length;
+        union_length -> union_rbracket;
+        union_rbracket -> union_comma;
+        union_ident -> union_comma;
+        union_comma -> union_type;
+        union_rbracket -> union_rbrace;
+        union_ident -> union_rbrace;
+        union_rbrace -> end;
+    }
+
+    subgraph enum {
+        enum_label [label = "enum";];
+        enum_name [label = "name";];
+        enum_lbrace [label = "{";];
+        enum_ident [label = "ident";];
+        enum_comma [label = ",";];
+        enum_rbrace [label = "}";];
+
+        start -> enum_label;
+        enum_label -> enum_name;
+        enum_name -> enum_lbrace;
+        enum_lbrace -> enum_ident;
+        enum_ident -> enum_comma;
+        enum_comma -> enum_ident;
+        enum_ident -> enum_rbrace;
+        enum_rbrace -> end;
+    }
+
+    subgraph type {
+        type_label [label = "type";];
+        type_name [label = "name";];
+        type_lbracket [label = "[";];
+        type_length [label = "length";];
+        type_rbracket [label = "]";];
+
+        start -> type_label;
+        type_label -> type_name;
+        type_name -> type_lbracket;
+        type_lbracket -> type_length;
+        type_length -> type_rbracket;
+        type_name -> end;
+        type_rbracket -> end;
+    }
+}
